@@ -1,0 +1,59 @@
+import random
+import time
+import threading
+from pynput.keyboard import Key, Listener, Controller
+
+keyboard = Controller()
+
+funny_phrases = [
+    "Wait... what was I saying again?",
+    "LOL",
+    "Error 404: Brain not found (u don't have one)",
+    "Your request has been approved.",
+    "Idc ‍🧤🧤",
+    "I'm a potato🥔",
+    "Too much information"
+]
+
+print("Chaos Keyboard is running in the background... Press ESC to stop.")
+
+running = True
+
+def on_press(key):
+    global running
+    try:
+        if key == Key.esc:
+            print("\nChaotic Keyboard stopped.")
+            running = False
+            return False
+        
+        # 1 in 10 chance to replace a word
+        if random.randint(1, 10) == 1:
+            phrase = random.choice(funny_phrases)
+            keyboard.type(f" {phrase} ")
+        
+        # 1 in 5 chance to swap the last letter
+        if random.randint(1, 5) == 1 and hasattr(key, 'char'):
+            keyboard.press(Key.backspace)  # Remove last letter
+            keyboard.release(Key.backspace)
+            keyboard.type(random.choice("abcdefghijklmnopqrstuvwxyz"))  # Replace with random letter
+        
+        # 1 in 4 chance to make backspace add random letters instead of deleting
+        if key == Key.backspace and random.randint(1, 4) == 1:
+            keyboard.type(random.choice("abcdefghijklmnopqrstuvwxyz"))
+    
+    except Exception as e:
+        print(f"I'm cooked {e}")
+
+def start_listener():
+    with Listener(on_press=on_press) as listener:
+        listener.join()
+
+listener_thread = threading.Thread(target=start_listener, daemon=True)
+listener_thread.start()
+
+while running:
+    time.sleep(1)
+
+
+
